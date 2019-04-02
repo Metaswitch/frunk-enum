@@ -8,7 +8,7 @@ pub enum HEither<H, T> {
     Tail(T),
 }
 
-struct Variant<K, T> {
+pub struct Variant<K, T> {
     pub key: &'static str,
     pub value: T,
     name_type_holder: PhantomData<K>,
@@ -44,6 +44,7 @@ where
     SourceHead: Transmogrifier<TargetHead, HeadIndices>,
     SourceTail: Transmogrifier<TargetTail, TailIndices>,
 {
+    #[inline(always)]
     fn transmogrify(self) -> HEither<Variant<Key, TargetHead>, TargetTail> {
         match self {
             HEither::Head(Variant { value: h, key: k, .. }) => HEither::Head(variant!(Key, h.transmogrify(), k)),

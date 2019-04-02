@@ -1,0 +1,16 @@
+[package]
+name = "derive"
+version = "0.1.0"
+authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "0.15.29", features = ["full"] }
+proc-macro2 = "0.4.27"
+quote = "0.6.11"
+frunk-enum = { path = "../core" }
+itertools = "0.8.0"
+frunk_proc_macro_helpers = "0.0.3"

@@ -1,8 +1,5 @@
-[package]
-name = "frunk-enum"
-version = "0.1.0"
-authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
-edition = "2018"
-
-[dependencies]
-frunk = "0.3.0"
+[workspace]
+members = [
+  "derive",
+  "core",
+]
