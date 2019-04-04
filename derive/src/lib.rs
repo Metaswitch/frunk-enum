@@ -55,6 +55,11 @@ fn create_repr_for0<'a>(mut variants: impl Iterator<Item = &'a syn::Variant>) ->
     }
 }
 
+fn create_repr_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
+    let repr = create_repr_for0(input.variants.iter());
+    quote!(type Repr = #repr;)
+}
+
 fn create_into_case_body_for<'a>(ident: &syn::Ident, fields: impl Iterator<Item = &'a Field>, depth: usize) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| {
         let ident = &f.ident;
@@ -100,20 +105,90 @@ fn create_into_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
     }
 }
 
-fn generate_for_derive_input(input: syn::ItemEnum) -> proc_macro2::TokenStream {
-    let ident = &input.ident;
-    let generics = &input.generics;
-    let repr = create_repr_for0(input.variants.iter());
-    let into = create_into_for(&input);
+fn create_from_case_pattern_for<'a>(fields: impl Iterator<Item = &'a Field>, depth: usize) -> proc_macro2::TokenStream {
+    let fields = fields.map(|f| &f.ident);
+    let mut inner = quote!(HEither::Head(Variant { value: hlist_pat!(#(#fields),*), .. }));
+    for _ in 0..depth {
+        inner = quote!(HEither::Tail(#inner));
+    }
+    inner
+}
 
-    quote! {
-        impl #generics LabelledGeneric for #ident #generics {
-            type Repr = #repr;
-            #into
+fn create_from_case_body_for<'a>(ident: &syn::Ident, variant: &syn::Variant, fields: impl Iterator<Item = &'a Field>) -> proc_macro2::TokenStream {
+    use syn::Fields::*;
+    let variant_ident = &variant.ident;
+    let fields = fields.map(|f| &f.ident);
+    let fields = match variant.fields {
+        Unit => quote!(),
+        Unnamed(_) => quote!((#(#fields.value),*)),
+        Named(_) => {
+            let fields = fields.map(|f| quote!(#f: #f.value));
+            quote!({#(#fields),*})
+        }
+    };
+    quote!(#ident::#variant_ident #fields)
+}
+
+/// ```skip
+/// HEither::Head(Variant { value: hlist_pat!(t), .. }) => YourResult::Ok(t.value),
+/// HEither::Tail(HEither::Head(Variant { value: hlist_pat!(e), .. }))=> YourResult::Err(e.value),
+/// HEither::Tail(HEither::Tail(void)) => match void {}, // Unreachable
+/// ```
+fn create_from_cases_for<'a>(enum_ident: &'a syn::Ident, variants: impl Iterator<Item = &'a syn::Variant> + 'a) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
+    variants.enumerate().map(move |(idx, v)| {
+        let labelled_fields = simplify_fields(&v.fields);
+        let pattern = create_from_case_pattern_for(labelled_fields.iter(), idx);
+        let body = create_from_case_body_for(enum_ident, &v, labelled_fields.iter());
+
+        quote!(#pattern => #body)
+    })
+}
+
+fn create_void_from_case(depth: usize) -> proc_macro2::TokenStream {
+    let mut pattern = quote!(void);
+    for _ in 0..depth {
+        pattern = quote!(HEither::Tail(#pattern));
+    }
+    quote!(#pattern => match void {})
+}
+
+fn create_from_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
+    let cases = create_from_cases_for(&input.ident, input.variants.iter());
+    let void_case = create_void_from_case(input.variants.len());
+    quote!{
+        fn from(repr: Self::Repr) -> Self {
+            match repr {
+                #(#cases),*,
+                #void_case,
+            }
         }
     }
 }
 
+fn generate_for_derive_input(input: syn::ItemEnum) -> proc_macro2::TokenStream {
+    let ident = &input.ident;
+    let generics = &input.generics;
+    let repr = create_repr_for(&input);
+    let into = create_into_for(&input);
+    let from = create_from_for(&input);
+
+    quote! {
+        impl #generics LabelledGeneric for #ident #generics {
+            #repr
+            #into
+            #from
+        }
+    }
+}
+
+/// ```skip
+/// #[derive(LabelledGenericEnum)]
+/// enum Foo<A, B> {
+///   Bar,
+///   Baz(u32, A, String),
+///   Quux { name: String, inner: B },
+/// }
+/// ```
 #[proc_macro_derive(LabelledGenericEnum)]
 pub fn derive_labelled_generic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as syn::ItemEnum);
@@ -122,7 +197,7 @@ pub fn derive_labelled_generic(input: proc_macro::TokenStream) -> proc_macro::To
 
 #[test]
 fn test_generate_for_enum() {
-    let e = syn::parse_str::<syn::ItemEnum>(r#"
+    let raw_enum = syn::parse_str::<syn::ItemEnum>(r#"
         enum Foo<C, E> {
             A,
             B(C, C, C),
@@ -130,5 +205,7 @@ fn test_generate_for_enum() {
         }
     "#).unwrap();
 
-    println!("{}", generate_for_derive_input(e));
+    let derived = generate_for_derive_input(raw_enum);
+
+    assert!(syn::parse_str::<syn::ItemImpl>(&derived.to_string()).is_ok());
 }
