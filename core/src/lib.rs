@@ -10,28 +10,29 @@ pub enum HEither<H, T> {
 pub struct Variant<K, T> {
     pub key: &'static str,
     pub value: T,
-    name_type_holder: PhantomData<K>,
+    pub name_type_holder: PhantomData<K>,
 }
 
+#[macro_export]
 macro_rules! variant {
     // No name provided and type is a tuple
     (($($repeated: ty),*), $value: expr) => {
-        variant!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
+        $crate::variant!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
     };
     // No name provided and type is a tuple, but with trailing commas
     (($($repeated: ty,)*), $value: expr) => {
-        variant!( ($($repeated),*), $value )
+        $crate::variant!( ($($repeated),*), $value )
     };
     // We are provided any type, with no stable name
     ($name_type: ty, $value: expr) => {
-        variant!( $name_type, $value, stringify!($name_type) )
+        $crate::variant!( $name_type, $value, stringify!($name_type) )
     };
     // We are provided any type, with a stable name
     ($name_type: ty, $value: expr, $name: expr) => {
         $crate::Variant::<$name_type,_> {
             key: $name,
             value: $value,
-            name_type_holder: PhantomData,
+            name_type_holder: std::marker::PhantomData,
         }
     }
 }
@@ -52,7 +53,7 @@ where
     }
 }
 
-enum Void {}
+pub enum Void {}
 
 impl Transmogrifier<Void, HNil> for Void {
     fn transmogrify(self) -> Void {

@@ -31,25 +31,25 @@ fn simplify_fields(fields: &syn::Fields) -> Vec<Field> {
 
 fn create_hlist_repr<'a>(mut fields: impl Iterator<Item = &'a Field>) -> proc_macro2::TokenStream {
     match fields.next() {
-        None => quote!(HNil),
+        None => quote!(frunk::HNil),
         Some(Field { ref ident, ref ty }) => {
             let tail = create_hlist_repr(fields);
             let ident = frunk_proc_macro_helpers::build_type_level_name_for(ident);
-            quote!(HCons<Field<#ident, #ty>, #tail>)
+            quote!(frunk::HCons<frunk::labelled::Field<#ident, #ty>, #tail>)
         }
     }
 }
 
 fn create_repr_for0<'a>(mut variants: impl Iterator<Item = &'a syn::Variant>) -> proc_macro2::TokenStream {
     match variants.next() {
-        None => quote!(Void),
+        None => quote!(frunk_enum::Void),
         Some(v) => {
             let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(&v.ident);
             let fields = simplify_fields(&v.fields);
             let hlist = create_hlist_repr(fields.iter());
             let tail = create_repr_for0(variants);
             quote!{
-                HEither<Variant<#ident_ty, #hlist>, #tail>
+                frunk_enum::HEither<frunk_enum::Variant<#ident_ty, #hlist>, #tail>
             }
         }
     }
@@ -64,12 +64,12 @@ fn create_into_case_body_for<'a>(ident: &syn::Ident, fields: impl Iterator<Item 
     let fields = fields.map(|f| {
         let ident = &f.ident;
         let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
-        quote!(field!(#ident_ty, #ident))
+        quote!(frunk::field!(#ident_ty, #ident))
     });
     let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
-    let mut inner = quote!(HEither::Head(variant!(#ident_ty, hlist![#(#fields),*])));
+    let mut inner = quote!(frunk_enum::HEither::Head(frunk_enum::variant!(#ident_ty, frunk::hlist![#(#fields),*])));
     for _ in 0..depth {
-        inner = quote!(HEither::Tail(#inner))
+        inner = quote!(frunk_enum::HEither::Tail(#inner))
     }
     inner
 }
@@ -107,9 +107,9 @@ fn create_into_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
 
 fn create_from_case_pattern_for<'a>(fields: impl Iterator<Item = &'a Field>, depth: usize) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| &f.ident);
-    let mut inner = quote!(HEither::Head(Variant { value: hlist_pat!(#(#fields),*), .. }));
+    let mut inner = quote!(frunk_enum::HEither::Head(frunk_enum::Variant { value: frunk::hlist_pat!(#(#fields),*), .. }));
     for _ in 0..depth {
-        inner = quote!(HEither::Tail(#inner));
+        inner = quote!(frunk_enum::HEither::Tail(#inner));
     }
     inner
 }
@@ -142,7 +142,7 @@ fn create_from_cases_for<'a>(enum_ident: &'a syn::Ident, variants: impl Iterator
 fn create_void_from_case(depth: usize) -> proc_macro2::TokenStream {
     let mut pattern = quote!(void);
     for _ in 0..depth {
-        pattern = quote!(HEither::Tail(#pattern));
+        pattern = quote!(frunk_enum::HEither::Tail(#pattern));
     }
     quote!(#pattern => match void {})
 }
@@ -168,7 +168,7 @@ fn generate_for_derive_input(input: syn::ItemEnum) -> proc_macro2::TokenStream {
     let from = create_from_for(&input);
 
     quote! {
-        impl #generics LabelledGeneric for #ident #generics {
+        impl #generics frunk::LabelledGeneric for #ident #generics {
             #repr
             #into
             #from
