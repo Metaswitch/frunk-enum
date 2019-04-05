@@ -10,7 +10,7 @@ struct Field {
     pub ty: syn::Type,
 }
 
-fn simplify_fields<'a>(fields: &'a syn::Fields) -> Vec<Field> {
+fn simplify_fields(fields: &syn::Fields) -> Vec<Field> {
     use syn::Fields::*;
     match fields {
         Unit => Vec::new(),
@@ -129,11 +129,6 @@ fn create_from_case_body_for<'a>(ident: &syn::Ident, variant: &syn::Variant, fie
     quote!(#ident::#variant_ident #fields)
 }
 
-/// ```skip
-/// HEither::Head(Variant { value: hlist_pat!(t), .. }) => YourResult::Ok(t.value),
-/// HEither::Tail(HEither::Head(Variant { value: hlist_pat!(e), .. }))=> YourResult::Err(e.value),
-/// HEither::Tail(HEither::Tail(void)) => match void {}, // Unreachable
-/// ```
 fn create_from_cases_for<'a>(enum_ident: &'a syn::Ident, variants: impl Iterator<Item = &'a syn::Variant> + 'a) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
     variants.enumerate().map(move |(idx, v)| {
         let labelled_fields = simplify_fields(&v.fields);

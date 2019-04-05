@@ -1,6 +1,5 @@
-use frunk::{HCons, HNil, field, hlist, Hlist, hlist_pat};
-use frunk::labelled::{Field, Transmogrifier, LabelledGeneric};
-use frunk::labelled::chars::*;
+use frunk::{HCons, HNil};
+use frunk::labelled::Transmogrifier;
 use std::marker::PhantomData;
 
 pub enum HEither<H, T> {
@@ -59,59 +58,4 @@ impl Transmogrifier<Void, HNil> for Void {
     fn transmogrify(self) -> Void {
         match self {}
     }
-}
-
-enum MyResult<T, E> {
-    Ok(T),
-    Err(E),
-}
-
-impl<T, E> LabelledGeneric for MyResult<T, E> {
-    type Repr = HEither<Variant<(o, k), Hlist![Field<(_0), T>]>, HEither<Variant<(e, r, r), Hlist![Field<(_0), E>]>, Void>>;
-
-    fn into(self) -> Self::Repr {
-        match self {
-            MyResult::Ok(t) => HEither::Head(variant!((o, k), hlist!(field!((_0), t)))),
-            MyResult::Err(e) => HEither::Tail(HEither::Head(variant!((e, r, r), hlist!(field!((_0), e))))),
-        }
-    }
-
-    fn from(repr: Self::Repr) -> Self {
-        match repr {
-            HEither::Head(Variant { value: hlist_pat!(t), .. }) => MyResult::Ok(t.value),
-            HEither::Tail(HEither::Head(Variant { value: hlist_pat!(e), .. }))=> MyResult::Err(e.value),
-            HEither::Tail(HEither::Tail(void)) => match void {}, // Unreachable
-        }
-    }
-}
-
-enum YourResult<T, E> {
-    Ok(T),
-    Err(E),
-}
-
-impl<T, E> LabelledGeneric for YourResult<T, E> {
-    type Repr = HEither<Variant<(o, k), Hlist![Field<(_0), T>]>, HEither<Variant<(e, r, r), Hlist![Field<(_0), E>]>, Void>>;
-
-    fn into(self) -> Self::Repr {
-        match self {
-            YourResult::Ok(t) => HEither::Head(variant!((o, k), hlist!(field!((_0), t)))),
-            YourResult::Err(e) => HEither::Tail(HEither::Head(variant!((e, r, r), hlist!(field!((_0), e))))),
-        }
-    }
-
-    fn from(repr: Self::Repr) -> Self {
-        match repr {
-            HEither::Head(Variant { value: hlist_pat!(t), .. }) => YourResult::Ok(t.value),
-            HEither::Tail(HEither::Head(Variant { value: hlist_pat!(e), .. }))=> YourResult::Err(e.value),
-            HEither::Tail(HEither::Tail(void)) => match void {}, // Unreachable
-        }
-    }
-}
-
-#[test]
-fn foo() {
-    let s: MyResult<String, u32> = MyResult::Ok("foo".to_string());
-
-    let t: YourResult<String, u32> = s.transmogrify();
 }
