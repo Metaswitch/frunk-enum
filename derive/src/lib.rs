@@ -3,8 +3,8 @@
 
 extern crate proc_macro;
 
-use syn::parse_macro_input;
 use quote::quote;
+use syn::parse_macro_input;
 
 use syn::spanned::Spanned as _;
 
@@ -22,18 +22,23 @@ fn simplify_fields(fields: &syn::Fields) -> Vec<Field> {
     use syn::Fields::*;
     match fields {
         Unit => Vec::new(),
-        Named(named) => named.named.iter().map(|f| {
-            Field {
+        Named(named) => named
+            .named
+            .iter()
+            .map(|f| Field {
                 ident: f.ident.as_ref().unwrap().clone(),
                 ty: f.ty.clone(),
-            }
-        }).collect(),
-        Unnamed(unnamed) => unnamed.unnamed.iter().enumerate().map(|(i, f)| {
-            Field {
+            })
+            .collect(),
+        Unnamed(unnamed) => unnamed
+            .unnamed
+            .iter()
+            .enumerate()
+            .map(|(i, f)| Field {
                 ident: syn::Ident::new(&format!("_{}", i), f.span()),
                 ty: f.ty.clone(),
-            }
-        }).collect(),
+            })
+            .collect(),
     }
 }
 
@@ -51,7 +56,9 @@ fn create_hlist_repr<'a>(mut fields: impl Iterator<Item = &'a Field>) -> proc_ma
 
 /// Recursively pack up the variants into a chain of `HEither` generic enums (with associated
 /// variant names).
-fn create_repr_for0<'a>(mut variants: impl Iterator<Item = &'a syn::Variant>) -> proc_macro2::TokenStream {
+fn create_repr_for0<'a>(
+    mut variants: impl Iterator<Item = &'a syn::Variant>,
+) -> proc_macro2::TokenStream {
     match variants.next() {
         None => quote!(frunk_enum::Void),
         Some(v) => {
@@ -59,7 +66,7 @@ fn create_repr_for0<'a>(mut variants: impl Iterator<Item = &'a syn::Variant>) ->
             let fields = simplify_fields(&v.fields);
             let hlist = create_hlist_repr(fields.iter());
             let tail = create_repr_for0(variants);
-            quote!{
+            quote! {
                 frunk_enum::HEither<frunk_enum::Variant<#ident_ty, #hlist>, #tail>
             }
         }
@@ -81,14 +88,20 @@ fn create_repr_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
 ///
 /// The `depth` argument indicates how many `Tail` wrappers to add (e.g. how far down the `HEither`
 /// chain this variant lies).
-fn create_into_case_body_for<'a>(ident: &syn::Ident, fields: impl Iterator<Item = &'a Field>, depth: usize) -> proc_macro2::TokenStream {
+fn create_into_case_body_for<'a>(
+    ident: &syn::Ident,
+    fields: impl Iterator<Item = &'a Field>,
+    depth: usize,
+) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| {
         let ident = &f.ident;
         let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
         quote!(frunk::field!(#ident_ty, #ident))
     });
     let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
-    let mut inner = quote!(frunk_enum::HEither::Head(frunk_enum::variant!(#ident_ty, frunk::hlist![#(#fields),*])));
+    let mut inner = quote!(frunk_enum::HEither::Head(
+        frunk_enum::variant!(#ident_ty, frunk::hlist![#(#fields),*])
+    ));
     for _ in 0..depth {
         inner = quote!(frunk_enum::HEither::Tail(#inner))
     }
@@ -97,7 +110,10 @@ fn create_into_case_body_for<'a>(ident: &syn::Ident, fields: impl Iterator<Item 
 
 /// Create cases for the variants for the `into()` implementation.  Captures the fields of the
 /// variant into bindings corresponding to the field names.
-fn create_into_cases_for<'a>(enum_ident: &'a syn::Ident, variants: impl Iterator<Item = &'a syn::Variant> + 'a) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
+fn create_into_cases_for<'a>(
+    enum_ident: &'a syn::Ident,
+    variants: impl Iterator<Item = &'a syn::Variant> + 'a,
+) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
     use syn::Fields::*;
     variants.enumerate().map(move |(idx, v)| {
         let variant_ident = &v.ident;
@@ -129,7 +145,7 @@ fn create_into_cases_for<'a>(enum_ident: &'a syn::Ident, variants: impl Iterator
 /// ```
 fn create_into_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
     let cases = create_into_cases_for(&input.ident, input.variants.iter());
-    quote!{
+    quote! {
         fn into(self) -> Self::Repr {
             match self {
                 #(#cases),*
@@ -143,9 +159,17 @@ fn create_into_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
 ///
 /// The `depth` argument indicates how many `Tail` wrappers to unpack (e.g. how far down the `HEither`
 /// chain this variant lies).
-fn create_from_case_pattern_for<'a>(fields: impl Iterator<Item = &'a Field>, depth: usize) -> proc_macro2::TokenStream {
+fn create_from_case_pattern_for<'a>(
+    fields: impl Iterator<Item = &'a Field>,
+    depth: usize,
+) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| &f.ident);
-    let mut inner = quote!(frunk_enum::HEither::Head(frunk_enum::Variant { value: frunk::hlist_pat!(#(#fields),*), .. }));
+    let mut inner = quote!(
+        frunk_enum::HEither::Head(frunk_enum::Variant {
+            value: frunk::hlist_pat!(#(#fields),*),
+            ..
+        })
+    );
     for _ in 0..depth {
         inner = quote!(frunk_enum::HEither::Tail(#inner));
     }
@@ -155,7 +179,11 @@ fn create_from_case_pattern_for<'a>(fields: impl Iterator<Item = &'a Field>, dep
 /// Create the body of the case statement for the `from()` implementation.  This builds the output
 /// variant from the captured fields.  It assumes that the fields are captured in the pattern as
 /// variables named as per the field identifiers.
-fn create_from_case_body_for<'a>(ident: &syn::Ident, variant: &syn::Variant, fields: impl Iterator<Item = &'a Field>) -> proc_macro2::TokenStream {
+fn create_from_case_body_for<'a>(
+    ident: &syn::Ident,
+    variant: &syn::Variant,
+    fields: impl Iterator<Item = &'a Field>,
+) -> proc_macro2::TokenStream {
     use syn::Fields::*;
     let variant_ident = &variant.ident;
     let fields = fields.map(|f| &f.ident);
@@ -172,7 +200,10 @@ fn create_from_case_body_for<'a>(ident: &syn::Ident, variant: &syn::Variant, fie
 
 /// Generate a case for the `from()` implementation for each variant (equivalently, for each `Repr`
 /// variant).  These cases are not complete (as they don't cover the "all Tail" case).
-fn create_from_cases_for<'a>(enum_ident: &'a syn::Ident, variants: impl Iterator<Item = &'a syn::Variant> + 'a) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
+fn create_from_cases_for<'a>(
+    enum_ident: &'a syn::Ident,
+    variants: impl Iterator<Item = &'a syn::Variant> + 'a,
+) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
     variants.enumerate().map(move |(idx, v)| {
         let labelled_fields = simplify_fields(&v.fields);
         let pattern = create_from_case_pattern_for(labelled_fields.iter(), idx);
@@ -208,7 +239,7 @@ fn create_void_from_case(depth: usize) -> proc_macro2::TokenStream {
 fn create_from_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
     let cases = create_from_cases_for(&input.ident, input.variants.iter());
     let void_case = create_void_from_case(input.variants.len());
-    quote!{
+    quote! {
         fn from(repr: Self::Repr) -> Self {
             match repr {
                 #(#cases),*,
@@ -252,13 +283,16 @@ pub fn derive_labelled_generic(input: proc_macro::TokenStream) -> proc_macro::To
 
 #[test]
 fn test_generate_for_enum() {
-    let raw_enum = syn::parse_str::<syn::ItemEnum>(r#"
+    let raw_enum = syn::parse_str::<syn::ItemEnum>(
+        r#"
         enum Foo<C, E> {
             A,
             B(C, C, C),
             D { foo: E, bar: E },
         }
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     let derived = generate_for_derive_input(&raw_enum);
 

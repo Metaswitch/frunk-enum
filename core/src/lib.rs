@@ -7,8 +7,8 @@
 //! enum, the `frunk-enum-derive` crate adds a proc-macro to auto-generate the per-type code needed
 //! to take advantage of this core function.
 
-use frunk::{HCons, HNil};
 use frunk::labelled::Transmogrifier;
+use frunk::{HCons, HNil};
 use std::marker::PhantomData;
 
 /// A building block for a generic enum.  The "additive-type" mirror for `frunk::HCons`.  This is
@@ -73,7 +73,9 @@ where
     #[inline(always)]
     fn transmogrify(self) -> HEither<Variant<Key, TargetHead>, TargetTail> {
         match self {
-            HEither::Head(Variant { value: h, key: k, .. }) => HEither::Head(variant!(Key, h.transmogrify(), k)),
+            HEither::Head(Variant {
+                value: h, key: k, ..
+            }) => HEither::Head(variant!(Key, h.transmogrify(), k)),
             HEither::Tail(t) => HEither::Tail(t.transmogrify()),
         }
     }
