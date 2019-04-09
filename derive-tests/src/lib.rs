@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, derive::LabelledGenericEnum)]
+#[derive(Debug, PartialEq, Eq, frunk_enum_derive::LabelledGenericEnum)]
 enum Colour {
     Red,
     Green,
@@ -6,7 +6,7 @@ enum Colour {
     Other(i32),
 }
 
-#[derive(Debug, PartialEq, Eq, derive::LabelledGenericEnum)]
+#[derive(Debug, PartialEq, Eq, frunk_enum_derive::LabelledGenericEnum)]
 enum Color {
     Red,
     Green,

@@ -1,18 +1,44 @@
+#![deny(missing_docs)]
+
+//! This crate augments the `frunk` crate with extra functionallity to allow transmogrification
+//! between enums with similar structures.
+//!
+//! This crate specifically defines the data strcutures used in the generic representation of an
+//! enum, the `frunk-enum-derive` crate adds a proc-macro to auto-generate the per-type code needed
+//! to take advantage of this core function.
+
 use frunk::{HCons, HNil};
 use frunk::labelled::Transmogrifier;
 use std::marker::PhantomData;
 
+/// A building block for a generic enum.  The "additive-type" mirror for `frunk::HCons`.  This is
+/// normally used as:
+///
+/// ```ignore
+/// HEither<A,
+///         HEither<B,
+///                 HEither<C,
+///                         Void>>>
+/// ```
 pub enum HEither<H, T> {
+    /// The first variant.
     Head(H),
+    /// The second/other variant.
     Tail(T),
 }
 
+/// A generic representation of an enum variant.  This holds the ident of the variant at both type
+/// and value levels.
 pub struct Variant<K, T> {
+    /// A text representation of the variant ident
     pub key: &'static str,
+    /// The value of the contents of the variant
     pub value: T,
+    /// A type-level representation of the variant ident
     pub name_type_holder: PhantomData<K>,
 }
 
+/// A macro to ease the creation of `Variant`s.  See `frunk::field!` for usage.
 #[macro_export]
 macro_rules! variant {
     // No name provided and type is a tuple
@@ -53,6 +79,7 @@ where
     }
 }
 
+/// An uninhabited type.
 pub enum Void {}
 
 impl Transmogrifier<Void, HNil> for Void {
