@@ -60,14 +60,14 @@ fn create_repr_for0<'a>(
     mut variants: impl Iterator<Item = &'a syn::Variant>,
 ) -> proc_macro2::TokenStream {
     match variants.next() {
-        None => quote!(frunk_enum::Void),
+        None => quote!(frunk_enum_core::Void),
         Some(v) => {
             let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(&v.ident);
             let fields = simplify_fields(&v.fields);
             let hlist = create_hlist_repr(fields.iter());
             let tail = create_repr_for0(variants);
             quote! {
-                frunk_enum::HEither<frunk_enum::Variant<#ident_ty, #hlist>, #tail>
+                frunk_enum_core::HEither<frunk_enum_core::Variant<#ident_ty, #hlist>, #tail>
             }
         }
     }
@@ -99,11 +99,11 @@ fn create_into_case_body_for<'a>(
         quote!(frunk::field!(#ident_ty, #ident))
     });
     let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
-    let mut inner = quote!(frunk_enum::HEither::Head(
-        frunk_enum::variant!(#ident_ty, frunk::hlist![#(#fields),*])
+    let mut inner = quote!(frunk_enum_core::HEither::Head(
+        frunk_enum_core::variant!(#ident_ty, frunk::hlist![#(#fields),*])
     ));
     for _ in 0..depth {
-        inner = quote!(frunk_enum::HEither::Tail(#inner))
+        inner = quote!(frunk_enum_core::HEither::Tail(#inner))
     }
     inner
 }
@@ -165,13 +165,13 @@ fn create_from_case_pattern_for<'a>(
 ) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| &f.ident);
     let mut inner = quote!(
-        frunk_enum::HEither::Head(frunk_enum::Variant {
+        frunk_enum_core::HEither::Head(frunk_enum_core::Variant {
             value: frunk::hlist_pat!(#(#fields),*),
             ..
         })
     );
     for _ in 0..depth {
-        inner = quote!(frunk_enum::HEither::Tail(#inner));
+        inner = quote!(frunk_enum_core::HEither::Tail(#inner));
     }
     inner
 }
@@ -217,7 +217,7 @@ fn create_from_cases_for<'a>(
 fn create_void_from_case(depth: usize) -> proc_macro2::TokenStream {
     let mut pattern = quote!(void);
     for _ in 0..depth {
-        pattern = quote!(frunk_enum::HEither::Tail(#pattern));
+        pattern = quote!(frunk_enum_core::HEither::Tail(#pattern));
     }
     quote!(#pattern => match void {})
 }
