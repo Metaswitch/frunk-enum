@@ -1,0 +1,12 @@
+[package]
+name = "frunk-enum-derive-tests"
+version = "0.1.0"
+authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+frunk-enum-derive = { path = "../derive" }
+frunk-enum-core = { path = "../core" }
+frunk = "0.3.0"
+frunk_core = "0.3.0"

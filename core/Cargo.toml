@@ -1,0 +1,9 @@
+[package]
+name = "frunk-enum-core"
+version = "0.1.0"
+authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
+edition = "2018"
+publish = ["metaswitch"]
+
+[dependencies]
+frunk = "0.3.0"
