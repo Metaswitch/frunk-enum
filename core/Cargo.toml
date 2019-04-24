@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
 edition = "2018"
 publish = ["metaswitch"]
+description = "Implemenation of genericized enums for use with frunk"
+documentation = "https://docsrs.datcon.co.uk/crate/frunk-enum-core"
+repository = "https://git.datcon.co.uk/amc/frunk-enum"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 frunk = "0.3.0"
