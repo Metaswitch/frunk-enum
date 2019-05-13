@@ -41,16 +41,16 @@ crates).
 
 ## Contributing
 
-Thank you for your interest in Vigil, all contributions are welcome whether
+Thank you for your interest in frunk-enum, all contributions are welcome whether
 they be reports of issues, feature requests or code contributions.
 
 ### Issue Contribution
 
-When opening issues please provide a description of the issue, the version of plus example
-code which exhibits the issue.
+When opening issues please provide a description of the issue, the version of
+frunk and frunk-enum plus example code which exhibits the issue.
 
 ### Code Contribution
 
-If you wish to contribute code to Vigil, you are welcome to do so using a
+If you wish to contribute code to frunk-enum, you are welcome to do so using a
 github pull request, however you will need to sign each commit, to indicate
 that you are abiding to the terms of the [DCO](DCO).
