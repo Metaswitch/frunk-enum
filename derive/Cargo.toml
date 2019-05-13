@@ -1,13 +1,15 @@
 [package]
 name = "frunk-enum-derive"
-version = "0.1.0"
-authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
+version = "0.2.0"
+authors = ["Metaswitch Networks Ltd"]
 edition = "2018"
-publish = ["metaswitch"]
 description = "Derive macros to implement the frunk::LabelledGeneric trait on enums"
-documentation = "https://docsrs.datcon.co.uk/crate/frunk-enum-derive"
-repository = "https://git.datcon.co.uk/amc/frunk-enum"
+documentation = "https://docs.rs/frunk-enum-derive"
+repository = "https://github.com/Metaswitch/frunk-enum"
 license = "MIT OR Apache-2.0"
+
+[badges.travis-ci]
+repository = "Metaswitch/frunk-enum"
 
 [lib]
 proc-macro = true

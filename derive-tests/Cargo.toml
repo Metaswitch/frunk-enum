@@ -1,7 +1,7 @@
 [package]
 name = "frunk-enum-derive-tests"
 version = "0.1.0"
-authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
+authors = ["Metaswitch Networks Ltd"]
 edition = "2018"
 publish = false
 
