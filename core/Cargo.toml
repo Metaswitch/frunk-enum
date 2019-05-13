@@ -1,13 +1,15 @@
 [package]
 name = "frunk-enum-core"
 version = "0.1.0"
-authors = ["Andy Caldwell <andrew.caldwell@metaswitch.com>"]
+authors = ["Metaswitch Networks Ltd"]
 edition = "2018"
-publish = ["metaswitch"]
 description = "Implemenation of genericized enums for use with frunk"
-documentation = "https://docsrs.datcon.co.uk/crate/frunk-enum-core"
-repository = "https://git.datcon.co.uk/amc/frunk-enum"
+documentation = "https://docs.rs/frunk-enum-core"
+repository = "https://github.com/Metaswitch/frunk-enum"
 license = "MIT OR Apache-2.0"
+
+[badges.travis-ci]
+repository = "Metaswitch/frunk-enum"
 
 [dependencies]
 frunk = "0.3.0"
