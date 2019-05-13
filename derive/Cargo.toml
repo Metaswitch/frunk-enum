@@ -1,6 +1,6 @@
 [package]
 name = "frunk-enum-derive"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Metaswitch Networks Ltd"]
 edition = "2018"
 description = "Derive macros to implement the frunk::LabelledGeneric trait on enums"
