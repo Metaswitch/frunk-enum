@@ -1,6 +1,6 @@
 # Frunk Enum Support
 
-[![Crates.io - frunk-enum](https://img.shields.io/crates/v/frunk-enum-core.svg)](https://crates.io/crates/frunk-enum-core) [![Build Status](https://travis-ci.org/Metaswitch/frunk-enum-core.svg?branch=master)](https://travis-ci.org/Metaswitch/frunk-enum-core) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: APACHE-2.0](https://img.shields.io/badge/License-APACHE-2.0-green.svg)](https://opensource.org/licenses/APACHE-2.0)
+[![Crates.io - frunk-enum](https://img.shields.io/crates/v/frunk-enum-core.svg)](https://crates.io/crates/frunk-enum-core) [![Build Status](https://travis-ci.org/Metaswitch/frunk-enum-core.svg?branch=master)](https://travis-ci.org/Metaswitch/frunk-enum-core) [![License: MIT/APACHE-2.0](https://img.shields.io/badge/License-MIT%2FAPACHE--2.0-green.svg)](https://opensource.org/licenses/MIT)
 
 ## Usage
 
