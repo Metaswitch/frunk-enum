@@ -17,6 +17,6 @@ proc-macro = true
 [dependencies]
 syn = { version = "0.15.29", features = ["full"] }
 proc-macro2 = "0.4.27"
-quote = "0.6.11"
+quote = "1.0.3"
 itertools = "0.8.0"
 frunk_proc_macro_helpers = "0.0.3"
