@@ -48,7 +48,7 @@ fn create_hlist_repr<'a>(mut fields: impl Iterator<Item = &'a Field>) -> proc_ma
         None => quote!(frunk::HNil),
         Some(Field { ref ident, ref ty }) => {
             let tail = create_hlist_repr(fields);
-            let ident = frunk_proc_macro_helpers::build_type_level_name_for(ident);
+            let ident = frunk_proc_macro_helpers::build_label_type(ident);
             quote!(frunk::HCons<frunk::labelled::Field<#ident, #ty>, #tail>)
         }
     }
@@ -62,7 +62,7 @@ fn create_repr_for0<'a>(
     match variants.next() {
         None => quote!(frunk_enum_core::Void),
         Some(v) => {
-            let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(&v.ident);
+            let ident_ty = frunk_proc_macro_helpers::build_label_type(&v.ident);
             let fields = simplify_fields(&v.fields);
             let hlist = create_hlist_repr(fields.iter());
             let tail = create_repr_for0(variants);
@@ -95,10 +95,10 @@ fn create_into_case_body_for<'a>(
 ) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| {
         let ident = &f.ident;
-        let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
+        let ident_ty = frunk_proc_macro_helpers::build_label_type(ident);
         quote!(frunk::field!(#ident_ty, #ident))
     });
-    let ident_ty = frunk_proc_macro_helpers::build_type_level_name_for(ident);
+    let ident_ty = frunk_proc_macro_helpers::build_label_type(ident);
     let mut inner = quote!(frunk_enum_core::HEither::Head(
         frunk_enum_core::variant!(#ident_ty, frunk::hlist![#(#fields),*])
     ));
