@@ -3,7 +3,7 @@
 //! This crate augments the `frunk` crate with extra functionallity to allow transmogrification
 //! between enums with similar structures.
 //!
-//! This crate specifically defines the data strcutures used in the generic representation of an
+//! This crate specifically defines the data structures used in the generic representation of an
 //! enum, the `frunk-enum-derive` crate adds a proc-macro to auto-generate the per-type code needed
 //! to take advantage of this core function.
 
