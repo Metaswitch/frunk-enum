@@ -253,13 +253,13 @@ fn create_from_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
 /// this crate, and is the entry point used for testing (as the proc-macro entrypoint cannot).
 fn generate_for_derive_input(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
     let ident = &input.ident;
-    let generics = &input.generics;
+    let (_, ty_generics, where_clause) = input.generics.split_for_impl();
     let repr = create_repr_for(&input);
     let into = create_into_for(&input);
     let from = create_from_for(&input);
 
     quote! {
-        impl #generics frunk::LabelledGeneric for #ident #generics {
+        impl #ty_generics frunk::LabelledGeneric for #ident #ty_generics #where_clause {
             #repr
             #into
             #from
