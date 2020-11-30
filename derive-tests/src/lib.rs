@@ -1,16 +1,18 @@
 #[derive(Debug, PartialEq, Eq, frunk_enum_derive::LabelledGenericEnum)]
-enum Colour {
+enum Colour<T> where T: std::fmt::Display {
     Red,
     Green,
     Blue,
+    Named(T),
     Other(i32),
 }
 
 #[derive(Debug, PartialEq, Eq, frunk_enum_derive::LabelledGenericEnum)]
-enum Color {
+enum Color<T> where T: std::fmt::Display {
     Red,
     Green,
     Blue,
+    Named(T),
     Other(i32),
 }
 
@@ -21,8 +23,15 @@ mod tests {
 
     #[test]
     fn unit_variants() {
-        let color = Color::Red;
-        let colour: Colour = color.transmogrify();
+        let color = Color::<String>::Red;
+        let colour: Colour<_> = color.transmogrify();
         assert_eq!(colour, Colour::Red);
+    }
+
+    #[test]
+    fn generics() {
+        let color = Color::Named("Silver");
+        let colour: Colour<_> = color.transmogrify();
+        assert_eq!(colour, Colour::Named("Silver"));
     }
 }
