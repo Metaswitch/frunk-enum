@@ -8,5 +8,5 @@ publish = false
 [dependencies]
 frunk-enum-derive = { path = "../derive" }
 frunk-enum-core = { path = "../core" }
-frunk = "0.3.1"
+frunk = "0.4.0"
 frunk_core = "0.3.1"
