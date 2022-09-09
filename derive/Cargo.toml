@@ -15,13 +15,13 @@ repository = "Metaswitch/frunk-enum"
 proc-macro = true
 
 [dependencies]
-syn = { version = "0.15", features = ["full"] }
-proc-macro2 = "0.4"
-quote = "0.6"
+syn = { version = ">=0.15, <2.0", features = ["full"] }
+proc-macro2 = ">=0.4, <2.0"
+quote = ">=0.6, <2.0"
 itertools = "0.10"
-frunk_proc_macro_helpers = "0.0.5"
+frunk_proc_macro_helpers = ">=0.0.5, <0.2"
 
 [dev-dependencies]
 frunk-enum-core = { version = "0.2.1", path = "../core" }
-frunk = "0.3.1"
-frunk_core = "0.3.1"
+frunk = "0.4.0"
+frunk_core = "0.4.0"
