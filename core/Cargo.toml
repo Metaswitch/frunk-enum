@@ -12,4 +12,4 @@ license = "MIT OR Apache-2.0"
 repository = "Metaswitch/frunk-enum"
 
 [dependencies]
-frunk = "0.3.1"
+frunk = ">=0.3.1, <0.5"
