@@ -24,4 +24,4 @@ frunk_proc_macro_helpers = "0.0.5"
 [dev-dependencies]
 frunk-enum-core = { version = "0.2.1", path = "../core" }
 frunk = "0.3.1"
-frunk_core = "0.3.1"
+frunk_core = "0.4.1"
