@@ -164,12 +164,10 @@ fn create_from_case_pattern_for<'a>(
     depth: usize,
 ) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| &f.ident);
-    let mut inner = quote!(
-        frunk_enum_core::HEither::Head(frunk_enum_core::Variant {
-            value: frunk::hlist_pat!(#(#fields),*),
-            ..
-        })
-    );
+    let mut inner = quote!(frunk_enum_core::HEither::Head(frunk_enum_core::Variant {
+        value: frunk::hlist_pat!(#(#fields),*),
+        ..
+    }));
     for _ in 0..depth {
         inner = quote!(frunk_enum_core::HEither::Tail(#inner));
     }
@@ -251,7 +249,11 @@ fn create_from_for(ident: &syn::Ident, input: &syn::DataEnum) -> proc_macro2::To
 
 /// Generates the complete derived code for an enum.  This is the main functional entrypoint for
 /// this crate, and is the entry point used for testing (as the proc-macro entrypoint cannot).
-fn generate_for_derive_input(ident: &syn::Ident, generics: &syn::Generics, enum_: &syn::DataEnum) -> proc_macro2::TokenStream {
+fn generate_for_derive_input(
+    ident: &syn::Ident,
+    generics: &syn::Generics,
+    enum_: &syn::DataEnum,
+) -> proc_macro2::TokenStream {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     let repr = create_repr_for(enum_);
     let into = create_into_for(ident, enum_);
