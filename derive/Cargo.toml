@@ -2,7 +2,7 @@
 name = "frunk-enum-derive"
 version = "0.2.1"
 authors = ["Metaswitch Networks Ltd"]
-edition = "2018"
+edition = "2021"
 description = "Derive macros to implement the frunk::LabelledGeneric trait on enums"
 documentation = "https://docs.rs/frunk-enum-derive"
 repository = "https://github.com/Metaswitch/frunk-enum"
