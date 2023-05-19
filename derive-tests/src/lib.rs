@@ -1,5 +1,8 @@
 #[derive(Debug, PartialEq, Eq, frunk_enum_derive::LabelledGenericEnum)]
-enum Colour<T> where T: std::fmt::Display {
+enum Colour<T>
+where
+    T: std::fmt::Display,
+{
     Red,
     Green,
     Blue,
@@ -8,7 +11,10 @@ enum Colour<T> where T: std::fmt::Display {
 }
 
 #[derive(Debug, PartialEq, Eq, frunk_enum_derive::LabelledGenericEnum)]
-enum Color<T> where T: std::fmt::Display {
+enum Color<T>
+where
+    T: std::fmt::Display,
+{
     Red,
     Green,
     Blue,

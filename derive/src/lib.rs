@@ -78,7 +78,7 @@ fn create_repr_for0<'a>(
 /// ```ignore
 /// type Repr = HEither<Variant<(f,i,r,s,t), Hlist![Field<(_0), A>]>, HEither<Variant<(s,e,c,o,n,d), Hlist![Field<(_0), B>]>, Void>>;
 /// ```
-fn create_repr_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
+fn create_repr_for(input: &syn::DataEnum) -> proc_macro2::TokenStream {
     let repr = create_repr_for0(input.variants.iter());
     quote!(type Repr = #repr;)
 }
@@ -96,11 +96,11 @@ fn create_into_case_body_for<'a>(
     let fields = fields.map(|f| {
         let ident = &f.ident;
         let ident_ty = frunk_proc_macro_helpers::build_label_type(ident);
-        quote!(frunk::field!(#ident_ty, #ident))
+        quote!(frunk::field!(#ident_ty, #ident, stringify!(#ident)))
     });
     let ident_ty = frunk_proc_macro_helpers::build_label_type(ident);
     let mut inner = quote!(frunk_enum_core::HEither::Head(
-        frunk_enum_core::variant!(#ident_ty, frunk::hlist![#(#fields),*])
+        frunk_enum_core::variant!(#ident_ty, frunk::hlist![#(#fields),*], stringify!(#ident))
     ));
     for _ in 0..depth {
         inner = quote!(frunk_enum_core::HEither::Tail(#inner))
@@ -143,8 +143,8 @@ fn create_into_cases_for<'a>(
 ///     }
 /// }
 /// ```
-fn create_into_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
-    let cases = create_into_cases_for(&input.ident, input.variants.iter());
+fn create_into_for(ident: &syn::Ident, input: &syn::DataEnum) -> proc_macro2::TokenStream {
+    let cases = create_into_cases_for(ident, input.variants.iter());
     quote! {
         fn into(self) -> Self::Repr {
             match self {
@@ -164,12 +164,10 @@ fn create_from_case_pattern_for<'a>(
     depth: usize,
 ) -> proc_macro2::TokenStream {
     let fields = fields.map(|f| &f.ident);
-    let mut inner = quote!(
-        frunk_enum_core::HEither::Head(frunk_enum_core::Variant {
-            value: frunk::hlist_pat!(#(#fields),*),
-            ..
-        })
-    );
+    let mut inner = quote!(frunk_enum_core::HEither::Head(frunk_enum_core::Variant {
+        value: frunk::hlist_pat!(#(#fields),*),
+        ..
+    }));
     for _ in 0..depth {
         inner = quote!(frunk_enum_core::HEither::Tail(#inner));
     }
@@ -204,16 +202,16 @@ fn create_from_cases_for<'a>(
     enum_ident: &'a syn::Ident,
     variants: impl Iterator<Item = &'a syn::Variant> + 'a,
 ) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
-    variants.enumerate().map(move |(idx, v)| {
-        let labelled_fields = simplify_fields(&v.fields);
+    variants.enumerate().map(move |(idx, variant)| {
+        let labelled_fields = simplify_fields(&variant.fields);
         let pattern = create_from_case_pattern_for(labelled_fields.iter(), idx);
-        let body = create_from_case_body_for(enum_ident, &v, labelled_fields.iter());
+        let body = create_from_case_body_for(enum_ident, variant, labelled_fields.iter());
 
         quote!(#pattern => #body)
     })
 }
 
-/// Generate an unreacahble case for unpacking a `Repr` (the `Tail(Tail(...(Void)...))` case).
+/// Generate an unreachable case for unpacking a `Repr` (the `Tail(Tail(...(Void)...))` case).
 fn create_void_from_case(depth: usize) -> proc_macro2::TokenStream {
     let mut pattern = quote!(void);
     for _ in 0..depth {
@@ -236,8 +234,8 @@ fn create_void_from_case(depth: usize) -> proc_macro2::TokenStream {
 ///
 /// The final case is needed for match-completeness, but fortunately it's uninhabited, so it'll
 /// never be hit.
-fn create_from_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
-    let cases = create_from_cases_for(&input.ident, input.variants.iter());
+fn create_from_for(ident: &syn::Ident, input: &syn::DataEnum) -> proc_macro2::TokenStream {
+    let cases = create_from_cases_for(ident, input.variants.iter());
     let void_case = create_void_from_case(input.variants.len());
     quote! {
         fn from(repr: Self::Repr) -> Self {
@@ -251,15 +249,18 @@ fn create_from_for(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
 
 /// Generates the complete derived code for an enum.  This is the main functional entrypoint for
 /// this crate, and is the entry point used for testing (as the proc-macro entrypoint cannot).
-fn generate_for_derive_input(input: &syn::ItemEnum) -> proc_macro2::TokenStream {
-    let ident = &input.ident;
-    let (_, ty_generics, where_clause) = input.generics.split_for_impl();
-    let repr = create_repr_for(&input);
-    let into = create_into_for(&input);
-    let from = create_from_for(&input);
+fn generate_for_derive_input(
+    ident: &syn::Ident,
+    generics: &syn::Generics,
+    enum_: &syn::DataEnum,
+) -> proc_macro2::TokenStream {
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let repr = create_repr_for(enum_);
+    let into = create_into_for(ident, enum_);
+    let from = create_from_for(ident, enum_);
 
     quote! {
-        impl #ty_generics frunk::LabelledGeneric for #ident #ty_generics #where_clause {
+        impl #impl_generics frunk::LabelledGeneric for #ident #ty_generics #where_clause {
             #repr
             #into
             #from
@@ -277,13 +278,16 @@ fn generate_for_derive_input(input: &syn::ItemEnum) -> proc_macro2::TokenStream 
 /// ```
 #[proc_macro_derive(LabelledGenericEnum)]
 pub fn derive_labelled_generic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as syn::ItemEnum);
-    generate_for_derive_input(&input).into()
+    let input = parse_macro_input!(input as syn::DeriveInput);
+    match input.data {
+        syn::Data::Enum(e) => generate_for_derive_input(&input.ident, &input.generics, &e).into(),
+        syn::Data::Struct(_) | syn::Data::Union(_) => quote!(compile_error!("#[derive(LabelledGenericEnum]] is only applicable for enum types");).into(),
+    }
 }
 
 #[test]
 fn test_generate_for_enum() {
-    let raw_enum = syn::parse_str::<syn::ItemEnum>(
+    let raw_enum = syn::parse_str::<syn::DeriveInput>(
         r#"
         enum Foo<C, E> {
             A,
@@ -294,7 +298,12 @@ fn test_generate_for_enum() {
     )
     .unwrap();
 
-    let derived = generate_for_derive_input(&raw_enum);
+    let enum_ = match &raw_enum.data {
+        syn::Data::Enum(e) => e,
+        _ => unreachable!(),
+    };
+
+    let derived = generate_for_derive_input(&raw_enum.ident, &raw_enum.generics, enum_);
 
     assert!(syn::parse_str::<syn::ItemImpl>(&derived.to_string()).is_ok());
 }

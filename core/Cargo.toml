@@ -2,7 +2,7 @@
 name = "frunk-enum-core"
 version = "0.2.1"
 authors = ["Metaswitch Networks Ltd"]
-edition = "2018"
+edition = "2021"
 description = "Implemenation of genericized enums for use with frunk"
 documentation = "https://docs.rs/frunk-enum-core"
 repository = "https://github.com/Metaswitch/frunk-enum"
@@ -12,4 +12,4 @@ license = "MIT OR Apache-2.0"
 repository = "Metaswitch/frunk-enum"
 
 [dependencies]
-frunk = "0.3.1"
+frunk = "0.4"
