@@ -2,7 +2,7 @@
 name = "frunk-enum-derive"
 version = "0.2.1"
 authors = ["Metaswitch Networks Ltd"]
-edition = "2018"
+edition = "2021"
 description = "Derive macros to implement the frunk::LabelledGeneric trait on enums"
 documentation = "https://docs.rs/frunk-enum-derive"
 repository = "https://github.com/Metaswitch/frunk-enum"
@@ -15,13 +15,14 @@ repository = "Metaswitch/frunk-enum"
 proc-macro = true
 
 [dependencies]
-syn = { version = "0.15", features = ["full"] }
-proc-macro2 = "0.4"
-quote = "0.6"
+syn = "1.0"
+proc-macro2 = "1.0"
+quote = "1.0"
 itertools = "0.10"
-frunk_proc_macro_helpers = "0.0.5"
+frunk_proc_macro_helpers = "0.1"
 
 [dev-dependencies]
 frunk-enum-core = { version = "0.2.1", path = "../core" }
-frunk = "0.3.1"
-frunk_core = "0.3.1"
+frunk = "0.4.1"
+frunk_core = "0.4.1"
+syn = { version = "1.0", features = ["full"] }

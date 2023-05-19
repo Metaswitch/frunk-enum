@@ -2,11 +2,11 @@
 name = "frunk-enum-derive-tests"
 version = "0.1.0"
 authors = ["Metaswitch Networks Ltd"]
-edition = "2018"
+edition = "2021"
 publish = false
 
 [dependencies]
 frunk-enum-derive = { path = "../derive" }
 frunk-enum-core = { path = "../core" }
-frunk = "0.3.1"
-frunk_core = "0.3.1"
+frunk = "0.4.1"
+frunk_core = "0.4.1"
