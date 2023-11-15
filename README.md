@@ -22,7 +22,7 @@ To take advantage of this feature for your own enum you need to:
         Baz { name: String, id: Identity },
     }
     ```
-* Add the `frunk-enum-core` and `frunk-core` crates as `[depednency]` entries
+* Add the `frunk-enum-core` and `frunk-core` crates as `[dependency]` entries
   to your `Cargo.toml`
 * Then (assuming there's a `NewFoo` enum with the same structure as `Foo`) you can write:
 
