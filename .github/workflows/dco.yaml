@@ -1,0 +1,9 @@
+name: DCO
+on:
+  merge_group:
+
+jobs:
+  DCO:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "dummy DCO (invoked by '${{ github.actor }}') workflow (it won't run any check actually) to trigger by merge_group in order to enable merge queue"
