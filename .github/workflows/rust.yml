@@ -1,8 +1,9 @@
 name: Rust
 
 on:
-  push:
-    branches: [ master, staging, trying ]
+  pull_request: {}
+  merge_group:
+    types: [checks_requested]
 
 jobs:
   check:
