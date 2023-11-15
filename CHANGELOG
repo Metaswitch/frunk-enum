@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0]
+### Changed
+- Depend on frunk v0.4
+
+### Fixed
+- Non-exposed dependency bumps
+  - frunk-macro-helpers v0.0.5
+  - syn v1.0
+  - proc-macro2 v1.0
+  - quote v1.0
+- Moved to Github Actions and Merge Queues for CI
+
 ## [0.2.1]  - 03-03-2021
 ### Fixed
 - Correctly handle types with `where` clauses

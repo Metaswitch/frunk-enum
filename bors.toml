@@ -1,2 +1,0 @@
-status = ["Check", "Test", "Rustfmt", "Clippy"]
-delete-merged-branches = true

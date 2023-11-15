@@ -1,6 +1,6 @@
 # Frunk Enum Support
 
-[![Crates.io - frunk-enum](https://img.shields.io/crates/v/frunk-enum-core.svg)](https://crates.io/crates/frunk-enum-core) [![Build Status](https://travis-ci.org/Metaswitch/frunk-enum.svg?branch=master)](https://travis-ci.org/Metaswitch/frunk-enum) [![License: MIT/APACHE-2.0](https://img.shields.io/badge/License-MIT%2FAPACHE--2.0-green.svg)](https://opensource.org/licenses/MIT)
+[![Crates.io - frunk-enum](https://img.shields.io/crates/v/frunk-enum-core.svg)](https://crates.io/crates/frunk-enum-core) [![License: MIT/APACHE-2.0](https://img.shields.io/badge/License-MIT%2FAPACHE--2.0-green.svg)](https://opensource.org/licenses/MIT)
 
 ## Usage
 
@@ -12,7 +12,7 @@ https://docs.rs/frunk/latest/frunk/labelled/trait.LabelledGeneric.html.
 
 To take advantage of this feature for your own enum you need to:
 
-* Add the `frunk-enum-derive` crate to your `Cargo.toml`
+* Add the `frunk-enum-derive` as a `[dev-dependency]` to your `Cargo.toml`
 * Mark the enum with the custom derive:
 
     ```
@@ -22,7 +22,8 @@ To take advantage of this feature for your own enum you need to:
         Baz { name: String, id: Identity },
     }
     ```
-* Add the `frunk-enum-core` and `frunk-core` crates to your `Cargo.toml`
+* Add the `frunk-enum-core` and `frunk-core` crates as `[depednency]` entries
+  to your `Cargo.toml`
 * Then (assuming there's a `NewFoo` enum with the same structure as `Foo`) you can write:
 
     ```

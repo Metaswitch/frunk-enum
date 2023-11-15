@@ -1,6 +1,6 @@
 [package]
 name = "frunk-enum-core"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Metaswitch Networks Ltd"]
 edition = "2021"
 description = "Implemenation of genericized enums for use with frunk"

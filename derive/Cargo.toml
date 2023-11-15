@@ -1,6 +1,6 @@
 [package]
 name = "frunk-enum-derive"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Metaswitch Networks Ltd"]
 edition = "2021"
 description = "Derive macros to implement the frunk::LabelledGeneric trait on enums"
@@ -22,7 +22,7 @@ itertools = "0.12"
 frunk_proc_macro_helpers = "0.1"
 
 [dev-dependencies]
-frunk-enum-core = { version = "0.2.1", path = "../core" }
+frunk-enum-core = { version = "0.3.0", path = "../core" }
 frunk = "0.4.1"
 frunk_core = "0.4.1"
 syn = { version = "1.0", features = ["full"] }

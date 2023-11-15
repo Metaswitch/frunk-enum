@@ -4,3 +4,4 @@ members = [
   "derive-tests",
   "core",
 ]
+resolver = "2"
